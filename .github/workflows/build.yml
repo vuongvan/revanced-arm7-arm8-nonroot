@@ -127,13 +127,13 @@ jobs:
         id: update_config
         run: |
           git checkout -f update || git switch --discard-changes --orphan update
-      #cp -f build.tmp build.md
+          cp -f build.tmp build.md
 
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          branch: update
-          skip_checkout: true
-          file_pattern: build.md
+      #- uses: stefanzweifel/git-auto-commit-action@v5
+       # with:
+         # branch: update
+        #  skip_checkout: true
+        #  file_pattern: build.md
    
       - name: Delete older releases rv
         if: ${{ steps.get_output.outputs.RV_LOG != '' }}
