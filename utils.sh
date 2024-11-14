@@ -411,7 +411,7 @@ patch_apk() {
         local x86apk="/${app_name_l}-x86-${rv_brand_f}.apk"
         local cpt="cp $TEMP_DIR$arm8apk $TEMP_DIR" zipd="zip -dq $TEMP_DIR" algn="$align $TEMP_DIR" sign="$apksign $BUILD_DIR"
         local stock_input=$1 patched_apk=$2 patcher_args=$3 rv_cli_jar=$4 rv_patches_jar=$5
-        local cmd="java -jar $rv_cli_jar patch $stock_input --purge -o $patched_apk -p $rv_patches_jar $patcher_args $options \
+        local cmd="java -jar $rv_cli_jar patch $stock_input --purge -o $patched_apk -p $rv_patches_jar $patcher_args \
 && ${build_tools}/aapt2 optimize --target-densities xxhdpi $patched_apk -o $TEMP_DIR$arm8apk \
 && $cpt$arm7apk && $cpt$x86_64apk && $cpt$x86apk \
 && $zipd$arm8apk lib/arme\* lib/x\* && $zipd$arm7apk lib/arm6\* lib/x\* && $zipd$x86_64apk lib/a\* lib/x86/\* && $zipd$x86apk lib/a\* lib/x86_\* \
@@ -444,10 +444,10 @@ build_rv() {
 	local dl_from=${args[dl_from]}
 	local arch=${args[arch]}
 	local arch_f="${arch// /}"
-        local options=${args[options]}
 
 	local p_patcher_args=()
-	p_patcher_args+=("$(join_args "${args[excluded_patches]}" -d) $(join_args "${args[included_patches]}" -e)")
+	if [ "${args[excluded_patches]}" ]; then p_patcher_args+=("$(join_args "${args[excluded_patches]}" -d)"); fi
+	if [ "${args[included_patches]}" ]; then p_patcher_args+=("$(join_args "${args[included_patches]}" -e)"); fi
 	[ "${args[exclusive_patches]}" = true ] && p_patcher_args+=("--exclusive")
 
 	local tried_dl=()
@@ -530,6 +530,7 @@ build_rv() {
 	local patcher_args patched_apk build_mode
 	local rv_brand_f=${args[rv_brand],,}
 	rv_brand_f=${rv_brand_f// /-}
+ 	if [ "${args[patcher_args]}" ]; then p_patcher_args+=("${args[patcher_args]}"); fi
 	for build_mode in "${build_mode_arr[@]}"; do
 		patcher_args=("${p_patcher_args[@]}")
 		pr "Building '${table}' in '$build_mode' mode"
